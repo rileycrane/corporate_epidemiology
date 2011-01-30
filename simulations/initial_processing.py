@@ -30,9 +30,9 @@ def load_individuals():
 		id_one, id_two, time_start, time_stop = single_interaction.split()
 		
 		# GET OR CREATE id one in database 
-		individual_one, id_one_created = Individual.objects.get_or_create(uuid=id_one)
+		individual_one, id_one_created = Individual.objects.get_or_create(ind_uuid=id_one)
 		# GET OR CREATE id two in database
-		individual_two, id_two_created = Individual.objects.get_or_create(uuid=id_two)
+		individual_two, id_two_created = Individual.objects.get_or_create(ind_uuid=id_two)
 		
 		# GET OR CREATE INTERACTION in database
 		interaction = Interaction()
@@ -45,3 +45,6 @@ def load_individuals():
 			interaction.save()
 		except:
 			pass
+
+if __name__=='__main__':
+	load_individuals()

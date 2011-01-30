@@ -42,3 +42,28 @@ THEN RUN YOUR CALCULATION
 
 # ** DUMPING THE INITIAL DATA
 # python manage.py dumpdata simulations > simulations/fixtures/initial_data.json
+
+
+
+
+####################################################
+# ** COMMON ERRORS
+Traceback (most recent call last):
+  File "simulations/initial_processing.py", line 7, in <module>
+    from simulations.models import *
+  File "/home/rcrane/local/django/django_projects/corporate_epidemiology/simulations/models.py", line 1, in <module>
+    from django.db import models
+  File "/usr/lib/pymodules/python2.6/django/db/__init__.py", line 14, in <module>
+    if not settings.DATABASES:
+  File "/usr/lib/pymodules/python2.6/django/utils/functional.py", line 276, in __getattr__
+    self._setup()
+  File "/usr/lib/pymodules/python2.6/django/conf/__init__.py", line 38, in _setup
+    raise ImportError("Settings cannot be imported, because environment variable %s is undefined." % ENVIRONMENT_VARIABLE)
+ImportError: Settings cannot be imported, because environment variable DJANGO_SETTINGS_MODULE is undefined.
+
+at the command line (or however you manage your environment variables)
+	set the following variable: DJANGO_SETTINGS_MODULE = corporate_epidemiology.settings 
+	for example in linux: export DJANGO_SETTINGS_MODULE=corporate_epidemiology.settings
+	
+--------------------------------------------------------------------------------------
+	

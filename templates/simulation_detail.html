@@ -5,22 +5,23 @@
 a:active, a:link, a:visited { text-decoration: none; }
 a:hover { text-decoration: underline; }
 </style>
-	<script type='text/javascript' src='http://www.google.com/jsapi'></script>
-	<script type='text/javascript'>
-		google.load('visualization', '1', {'packages':['annotatedtimeline']});
-		google.setOnLoadCallback(drawChart);
-		function drawChart() {
-			var data = new google.visualization.DataTable();
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript">
+	  google.load("visualization", "1", {packages:["corechart"]});
+	  google.setOnLoadCallback(drawChart);
+	  function drawChart() {
+		var data = new google.visualization.DataTable();
 		{{visualization_data|safe}}
-			var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
-			chart.draw(data, {displayAnnotations: true});
-		}
+		var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+		chart.draw(data, {width: 600, height: 540, title: 'Simulation'});
+	  }
 	</script>
+
 {% endblock %}
 
 
 {% block content %} 
-		<div>Simulation Activity
+		<div><h4><a href="{% url simulations %}">Back to all runs</a></h4>
 			<div id='chart_div' style='width: 630px; height: 540px;'></div>
 		</div>
 {% endblock %}

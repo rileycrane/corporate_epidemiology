@@ -4,7 +4,7 @@
 	<h2>Simulations</h2>
 	<ul>
 	{% for simulation in object_list %}
-			<a href="{{ simulation.get_absolute_url }}">{{ simulation.uuid }}</a>
+			<li>{{simulation.created_at|date:"F d, Y"}}:  <a href="{{ simulation.get_absolute_url }}">{{ simulation.sim_uuid }}</a></li>
 		{% endfor %}
 	</ul>
 {% endblock %}

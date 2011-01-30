@@ -13,6 +13,6 @@ all_simulations = {
 urlpatterns = patterns('',
 	(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 	(r'^admin/', include(admin.site.urls)),
-	(r'^simulations/$', list_detail.object_list, all_simulations),
+	(r'^simulations/$', list_detail.object_list, all_simulations,'simulations'),
 	url(r'^simulations/(?P<uuid>[-\w]+)/$', 'simulations.views.simulation_detail'),
 )
