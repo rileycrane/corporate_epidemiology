@@ -1,0 +1,44 @@
+# ** PYTHON SIR
+# http://wiki.deductivethinking.com/wiki/Program_7.4
+
+################################################################################
+# ** REQUIREMENTS
+python
+django
+python-numpy
+
+################################################################################
+# ** GETTING STARTED
+* INSTALL ABOVE REQUIREMENTS
+
+* SET ENVIRONMENT VARIABLES:
+>>>export DJANGO_SETTINGS_MODULE=coporate_epidemiology.settings
+
+* SET UP THE DATABASE
+>>>python manage.py syncdb
+
+DEFINE YOUR CALCULATION IN 'simulations/calculations.py'
+THEN RUN YOUR CALCULATION
+>>>python simulations/calculations.py
+
+################################################################################
+# ** SPECIFY PARAMETERS (in parameters.py)
+#  Each simulation requires (i, t_min, t_max, alpha, beta)
+#	Y0    = [id1, id2, ...] where each id = individual to be infected
+#		  = [id1]
+#		  = [id1, id3, id4]
+#		  = 10 # Randomly select 10 individuals 
+		
+#	t_min = Minimum valid contact time
+#	t_max = Maximum valid contact time
+#	beta  = probability of disease transmission
+#	gamma = recovery rate
+#   function [t,X,Y] = Program_SIR(N, Size, beta, gamma, alpha , Y0, timestep, MaxTime)
+
+
+##################################################
+# ** CREATING THE INITIAL DATA
+# run: simulations.initial_processing.load_individuals
+
+# ** DUMPING THE INITIAL DATA
+# python manage.py dumpdata simulations > simulations/fixtures/initial_data.json

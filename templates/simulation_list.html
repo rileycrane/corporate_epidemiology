@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h2>Simulations</h2>
+	<ul>
+	{% for simulation in object_list %}
+			<a href="{{ simulation.get_absolute_url }}">{{ simulation.uuid }}</a>
+		{% endfor %}
+	</ul>
+{% endblock %}
