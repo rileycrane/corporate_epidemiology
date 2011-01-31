@@ -1,0 +1,5 @@
+*.pyc
+epi.db
+.settings/*
+*~
+.DS_Store

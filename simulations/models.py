@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.db.models import Max
 
 class SimRun(models.Model):
 	"""
@@ -15,6 +15,9 @@ class SimRun(models.Model):
 	t_min_filter = models.FloatField(blank=True,null=True) # 
 	t_max_filter = models.FloatField(blank=True,null=True) # 
 	created_at = models.DateTimeField(auto_now=True)
+	
+	def final_size(self):
+		return self.simtimeseries_set.aggregate(Max('infected')).get('infected__max')
 
 	def __unicode__(self):
 		#return self.uuid

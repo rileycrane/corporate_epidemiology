@@ -3,12 +3,6 @@ from simulations.models import Individual
 
 # SPECIFY THE SETS OF PARAMETERS FOR THE SIMULATION
 #  ** OVERVIEW
-#  Each simulation requires (i, t_min, t_max, alpha, beta)
-#	Y0    = [id1, id2, ...] where each id = individual to be infected
-#		  = [id1]
-#		  = [id1, id3, id4]
-#		  = 10 # Randomly select 10 individuals 
-		
 #	t_min_filter = sets the MINIMUM valid contact time.  if the duration of contact was less
 #					than this, we will exclude it from the simulation
 #	t_max_filter = sets the MAXIMUM valid contact time.  if the duration of contact was greater
@@ -92,17 +86,17 @@ def set_initial_parameters(option=None, N=None):
 	from numpy import arange
 	#beta = arange(1,1.5,0.1)
 	# gamma = arange(0.4, 0.6, 0.1)
-	beta=[1,2]
-	gamma=[5,6]
+	beta=[1]
+	gamma=[0.5]
 	alpha = [None]
 	# options = {'each', 'combo', 'expansive', 'expansive_max'
 	# 0<N<# of individuals
 	Y0=generate_initial_infected(option, N)
 	timestep = [0.1]
 	max_time = [100]
-	t_min_filter = [1,2,3]
-	t_max_filter = [6,7]
-	multiplicity = 2 # i.e. number of times to run each simulation with same parameters
+	t_min_filter = [0,300]
+	t_max_filter = [0,4000]
+	multiplicity = 1 # i.e. number of times to run each simulation with same parameters
 	return beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity
 
 # COMBINES PARAMETER SETS

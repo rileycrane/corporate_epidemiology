@@ -27,7 +27,10 @@ def simulate(infection_function=None):
 		infection_function = 'standard'
 
 	# Get all parameter sets
-	parameters = get_parameters()
+	parameters = get_parameters('each')
+	#parameters = get_parameters('combo',3)
+	#parameters = get_parameters('expansive')
+	#parameters = get_parameters('expansive_max',3)
 	
 	# Loop through each set:
 	for parameter_set in parameters:
@@ -40,7 +43,11 @@ def simulate(infection_function=None):
 		# RUN SIMULATION
 #		try:
 		# GENERATE TIME SERIES using the simulation kernal defined in simulations/calculations.py
-		S, I, T = program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, infection_function)
+		try:
+			print "\tExecuting:\n\t\tbeta:%s\n\t\tY0:%s\n\t\t%s\n\t\t%s" % (beta, Y0, t_min_filter, t_max_filter)
+			S, I, T = program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, infection_function)
+		except:
+			continue
 		
 		# DERIVATIVE CALCULATIONS ON time series data  
 		
@@ -51,8 +58,8 @@ def simulate(infection_function=None):
 									t_min_filter=t_min_filter, t_max_filter=t_max_filter)
 		
 		# TURN SINGLE INDIVIDUAL INTO A LIST
-		if isinstance(YO,int):
-			Y0=[Y0]
+		if isinstance(Y0,int):
+			Y0=(Y0,)
 		# STORE INITIAL INFECTED
 		for ind_uuid in Y0:
 			individual = Individual.objects.get(ind_uuid=ind_uuid)
@@ -64,3 +71,5 @@ def simulate(infection_function=None):
 #		except:
 #			continue
 	
+if __name__=='__main__':
+	simulate()

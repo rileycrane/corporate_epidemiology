@@ -13,7 +13,7 @@ except ImportError:
 
 ####################################
 # ** IMPORT DEPENDENCIES
-from django.db.models import Max
+from django.db.models import Max, Min
 import uuid
 from simulations.models import *
 from simulations import infections
@@ -33,13 +33,21 @@ def program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_
 	I = []
 	T = []
 	# LOAD DATA BASED ON filters
+	min_duration = Interaction.objects.aggregate(Min('duration')).get('duration__min')
+	max_duration = Interaction.objects.aggregate(Max('duration')).get('duration__max')
 	if t_min_filter is None:
 		t_min_filter = 0
 	if t_max_filter is None:
-		t_max_filter = Interaction.objects.aggregate(Max('duration')).get('duration__max') + 10
+		t_max_filter = max_duration
+		 
+	if t_max_filter < min_duration:
+		raise Exception("t_max_filter too small: min duration = %s" % min_duration)
+	if t_min_filter > max_duration:
+		raise Exception("t_min_filter too large: max duration = %s" % max_duration)
+
 	
 	# GET ALL INTERACTIONS SATISFYING DURATION CONSTRAINTS	
-	all_valid_interactions = Interaction.objects.filter(duration__gte=t_min_filter, duration__lte=t_max_filter).order_by('start_time')
+	all_valid_interactions = Interaction.objects.filter(duration__gte=t_min_filter, duration__lte=t_max_filter).order_by('time_start')
 	
 	# SANITY CHECK
 	if isinstance(Y0,int):
@@ -60,9 +68,9 @@ def program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_
 		i2 = interaction.individual_two
 		if i1.is_infected and not i2.is_infected:
 			# LOAD FUNCTION (i.e. Q = 1-exp(-duration*beta)) 
-			Q = getattr(infection_module,infection_function)
+			Q = getattr(infections,infection_function)
 			# CALCULATE q
-			q = Q(duration, beta)
+			q = Q(interaction.duration, beta)
 			# DETERMINE IF INFECTION OCCURRED
 			if q > rand():
 				i2.is_infected=True
@@ -70,9 +78,9 @@ def program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_
 			
 		elif not i1.is_infected and i2.is_infected:
 			# LOAD FUNCTION (i.e. Q = 1-exp(-duration*beta)) 
-			Q = getattr(infection_module,infection_function)
+			Q = getattr(infections,infection_function)
 			# CALCULATE q
-			q = Q(duration, beta)
+			q = Q(interaction.duration, beta)
 			# DETERMINE IF INFECTION OCCURRED
 			if q > rand():
 				i1.is_infected=True
@@ -85,7 +93,3 @@ def program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_
 	return S, I, T 
 
 
-#if __name__=='__main__':
-#	function_to_run = 'load_individuals'
-#	program_to_run = getattr(initial_processing, function_to_run)
-#	program_to_run()
