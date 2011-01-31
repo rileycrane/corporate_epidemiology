@@ -12,8 +12,8 @@ class SimRun(models.Model):
 	gamma = models.FloatField(blank=True,null=True)
 	timestep = models.FloatField(blank=True,null=True)
 	max_time = models.IntegerField(blank=True,null=True) 
-	t_min_filter = models.FloatField(blank=True,null=True) # Time in seconds
-	t_max_filter = models.FloatField(blank=True,null=True) # Time in seconds
+	t_min_filter = models.FloatField(blank=True,null=True) # 
+	t_max_filter = models.FloatField(blank=True,null=True) # 
 	created_at = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
@@ -38,7 +38,8 @@ class Individual(models.Model):
 	as defined in ir_interactions.txt
 	initial_data in fixtures
 	"""
-	ind_uuid = models.IntegerField(unique=True)
+	ind_uuid    = models.IntegerField(unique=True)
+	is_infected = models.BooleanField(default=False)
 	def __unicode__(self):
 		#return self.uuid
 		return "%s" % self.ind_uuid

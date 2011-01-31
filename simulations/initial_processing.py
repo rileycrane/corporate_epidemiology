@@ -1,4 +1,5 @@
 # FUNCTIONS TO LOAD INITIAL DATA
+from __future__ import division
 import os
 import numpy
 ROOT_PATH = os.path.dirname(__file__)
@@ -38,9 +39,11 @@ def load_individuals():
 		interaction = Interaction()
 		interaction.individual_one = individual_one 
 		interaction.individual_two = individual_two
-		interaction.time_start     = int(numpy.float64(time_start)) # -int(min_time)
-		interaction.time_stop      = int(numpy.float64(time_stop)) # -int(min_time)
-		interaction.duration       = int(numpy.float64(time_stop) -numpy.float64(time_start))
+		time_start = int(numpy.float64(time_start)/374400) # secs since start
+		interaction.time_start     = time_start
+		time_stop = int(numpy.float64(time_stop)/374400) # secs since start
+		interaction.time_stop      = time_stop
+		interaction.duration       = time_stop-time_start
 		try:
 			interaction.save()
 		except:

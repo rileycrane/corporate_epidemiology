@@ -16,14 +16,16 @@ from simulations.models import *
 import uuid
 
 
-def simulate(dry_run=None):
+def simulate(dry_run=None, infection_function=None):
 	"""
 	Main program to control the simulation.
 	
 	It will run all simulations based on all the parameter sets you specify, along with the multiplicity of each one
 		(i.e. run 10 simulations using the following parameter values (alpha=1, beta=1.1,...)
 	"""
-	
+	if infection_function is None:
+		infection_function = 'standard'
+
 	# Get all parameter sets
 	parameters = get_parameters(dry_run)
 	
@@ -37,8 +39,11 @@ def simulate(dry_run=None):
 
 		# RUN SIMULATION
 #		try:
-		# GENERATE TIME SERIES
-		S, I, T = program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter)
+		# GENERATE TIME SERIES using the simulation kernal defined in simulations/calculations.py
+		S, I, T = program_sir(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, infection_function)
+		
+		# DERIVATIVE CALCULATIONS ON time series data  
+		
 		# STORE PARAMETERS
 		sim_run = SimRun.objects.create(sim_uuid=sim_uuid,calculation_name='program_sir',
 									beta=beta, gamma=gamma, alpha=alpha,
