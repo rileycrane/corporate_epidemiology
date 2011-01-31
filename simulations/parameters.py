@@ -85,45 +85,30 @@ def generate_initial_infected(option=None, N=None):
 
 
 # SPECIFY THE INITIAL PARAMETERS
-def set_initial_parameters(dry_run=None):
+def set_initial_parameters(option=None, N=None):
 	"""
 	SPECIFY PARAMETER SETS
 	"""
 	from numpy import arange
 	#beta = arange(1,1.5,0.1)
 	# gamma = arange(0.4, 0.6, 0.1)
-	if dry_run is None:
-		dry_run = False
-		
-	if not dry_run:
-		beta=[1,2]
-		gamma=[5,6]
-		alpha = [None]
-		# options = {'each', 'combo', 'expansive', 'expansive_max'
-		# 0<N<# of individuals
-		Y0=generate_initial_infected(option=None, N=None)
-		timestep = [0.1]
-		max_time = [100]
-		t_min_filter = [1,2,3]
-		t_max_filter = [6,7]
-		multiplicity = 2 # i.e. number of times to run each simulation with same parameters
-	else:
-		beta=[1]
-		gamma=[2]
-		alpha = [None]
-		Y0=[Individual.objects.all().order_by('?')[0].ind_uuid] # Get one random individual
-		timestep = [1]
-		max_time = [100]
-		t_min_filter = [1]
-		t_max_filter = [7]
-		multiplicity = 1 # i.e. number of times to run each simulation with same parameters
-		
+	beta=[1,2]
+	gamma=[5,6]
+	alpha = [None]
+	# options = {'each', 'combo', 'expansive', 'expansive_max'
+	# 0<N<# of individuals
+	Y0=generate_initial_infected(option, N)
+	timestep = [0.1]
+	max_time = [100]
+	t_min_filter = [1,2,3]
+	t_max_filter = [6,7]
+	multiplicity = 2 # i.e. number of times to run each simulation with same parameters
 	return beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity
 
 # COMBINES PARAMETER SETS
-def get_parameters(dry_run=None):
+def get_parameters(option=None, N=None):
 	print "beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity"
-	beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity = set_initial_parameters(dry_run)
+	beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity = set_initial_parameters(option, N)
 	parameter_set = list(product(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter))
 	full_parameter_set = multiplicity*parameter_set
 	return full_parameter_set

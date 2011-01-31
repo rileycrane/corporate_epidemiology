@@ -16,7 +16,7 @@ from simulations.models import *
 import uuid
 
 
-def simulate(dry_run=None, infection_function=None):
+def simulate(infection_function=None):
 	"""
 	Main program to control the simulation.
 	
@@ -27,7 +27,7 @@ def simulate(dry_run=None, infection_function=None):
 		infection_function = 'standard'
 
 	# Get all parameter sets
-	parameters = get_parameters(dry_run)
+	parameters = get_parameters()
 	
 	# Loop through each set:
 	for parameter_set in parameters:
