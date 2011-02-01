@@ -29,7 +29,7 @@ def get_simulation_data(sim_uuid):
 			#visualization_data+="""data.setValue(%s, 0, new Date(%s, %s ,%s));\ndata.setValue(%s, 1, %s);\ndata.setValue(%s, 4, %s);\n""" % (counter, date.year, date.month-1, date.day, counter, susceptible[date], counter, infected[date])
 		except:
 			pass
-
+	
 	return visualization_data
 
 def simulation_detail(request, uuid, template_name=None):
@@ -41,4 +41,5 @@ def simulation_detail(request, uuid, template_name=None):
 	visualization_data =get_simulation_data(uuid)
 	context = {}
 	context['visualization_data'] = visualization_data
+	context['sim_run']=SimRun.objects.get(sim_uuid=uuid)
 	return direct_to_template(request, template_name, extra_context=context, context_instance=RequestContext(request))

@@ -15,25 +15,46 @@ class SimRun(models.Model):
 	t_min_filter = models.FloatField(blank=True,null=True) # 
 	t_max_filter = models.FloatField(blank=True,null=True) # 
 	created_at = models.DateTimeField(auto_now=True)
+
+	def initial_number_infections(self):
+		"""
+		Return the number of individuals initially infected
+		"""
+		return self.initialinfected_set.count()
 	
 	def final_size(self):
+		"""
+		Return the final size of the epidemic
+		"""
 		return self.simtimeseries_set.aggregate(Max('infected')).get('infected__max')
+	
+	def interaction_network(self):
+		"""
+		Return the interactions used in this model after applying filter
+		"""
+		return Interaction.objects.filter(duration__gte=self.t_min_filter, duration__lte=self.t_max_filter)
 
 	def __unicode__(self):
-		#return self.uuid
+		"""
+		Returns a string associated with this calculation
+		"""
 		return "%s, %s: %s" % (self.calculation_name,self.created_at,self.sim_uuid)
 
 	def get_absolute_url(self):
+		"""
+		Returns a url pointing to the visualization of the epidemic
+		"""
 		return "/simulations/%s/" % self.sim_uuid
+
 
 class SimTimeSeries(models.Model):
 	"""
 	Stores one value in the time series, connected to the parameters of the SimRun
 	"""
-	sim_run     = models.ForeignKey(SimRun)
-	susceptible = models.IntegerField()
-	infected    = models.IntegerField()
-	t           = models.FloatField()
+	sim_run     = models.ForeignKey(SimRun) # Link to the simulation run
+	susceptible = models.IntegerField() # Count of number susceptible
+	infected    = models.IntegerField() # Count of number infected
+	t           = models.FloatField()   # Time 
 
 class Individual(models.Model):
 	"""
@@ -55,8 +76,8 @@ class InitialInfected(models.Model):
 	"""
 	sim_run = models.ForeignKey(SimRun)
 	individual_infected = models.ForeignKey(Individual) 
-#	def __unicode__(self):
-#		return sim_run.uuid
+	def __unicode__(self):
+		return "%s: %s" % (self.sim_run.sim_uuid, self.individual_infected.ind_uuid)
 
 class Interaction(models.Model):
 	"""
@@ -76,6 +97,3 @@ class Interaction(models.Model):
 	def __unicode__(self):
 		#return self.uuid
 		return "%s, %s: %s" % (self.individual_one.ind_uuid, self.individual_two.ind_uuid, self.duration)
-	
-#	def __unicode__(self):
-#		return "%s & %s: dt=%s" % (self.individual_one.uuid, self.individual_two.uuid, self.duration)

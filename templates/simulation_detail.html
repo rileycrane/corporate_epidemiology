@@ -21,7 +21,19 @@ a:hover { text-decoration: underline; }
 
 
 {% block content %} 
-		<div><h4><a href="{% url simulations %}">Back to all runs</a></h4>
+		<div>
+			<h4><a href="{% url simulations %}">Back to all runs</a></h4>
+			<ul>
+				<li>Beta: {{sim_run.beta}}</li>
+				<li>Gamma: {{sim_run.gamma}}</li>
+				<li>Individuals Infected Initially
+					<ul>
+					{% for init_infected in sim_run.initialinfected_set.all %}
+						<li>{{init_infected.individual_infected.ind_uuid}}</li>
+					{% endfor %}
+					</ul>
+				</li>
+			</ul>
 			<div id='chart_div' style='width: 630px; height: 540px;'></div>
 		</div>
 {% endblock %}
