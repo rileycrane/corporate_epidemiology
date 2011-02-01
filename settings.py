@@ -102,4 +102,5 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'simulations',
     'django.contrib.admindocs',
+    'django_extensions',
 )
