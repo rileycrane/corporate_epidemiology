@@ -108,7 +108,9 @@ class InfectionNetwork(MPTTModel):
 	duration        = models.FloatField(blank=True, null=True)
 
 	def __unicode__(self):
-		if self.parent:
+		if self.parent and self.infection_stop:
+			return "%s: infected by %s @ %s | recovered @ %s" % (self.individual.ind_uuid, self.parent.individual.ind_uuid,self.infection_start, self.infection_stop)
+		elif self.parent:
 			return "%s: infected by %s @ %s" % (self.individual.ind_uuid, self.parent.individual.ind_uuid,self.infection_start)
 		else:
 			return "%s: initial seed" % (self.individual.ind_uuid)

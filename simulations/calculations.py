@@ -244,7 +244,7 @@ def program_sir_sendhome(infection_function, recovery_function, set_of_parameter
 				
 				####################################################
 				# ** REMOVE INTERACTIONS OCCURRING IN THIS PERIOD
-				removed_interaction = Interaction.objects.filter(
+				removed_interactions = Interaction.objects.filter(
 					Q(time_start__gte=time_of_infection),
 					Q(time_stop__lte=time_of_recovery),
 					Q(individual_one=i1) | Q(individual_two=i1),
@@ -262,7 +262,7 @@ def program_sir_sendhome(infection_function, recovery_function, set_of_parameter
 				################################
 				# ** CAPTURE INFECTION NETWORK
 				time_of_infection = interaction.time_start+(interaction.duration/2) # IS THIS CORRECT?
-				duration_of_infection = recovery_fuction(nu)
+				duration_of_infection = recovery_function(nu)
 				time_of_recovery  = time_of_infection+duration_of_infection
 
 				i2_inf_net, in1_created = InfectionNetwork.objects.get_or_create(individual=i2)
@@ -270,7 +270,7 @@ def program_sir_sendhome(infection_function, recovery_function, set_of_parameter
 
 				####################################################
 				# ** REMOVE INTERACTIONS OCCURRING IN THIS PERIOD
-				removed_interaction = Interaction.objects.filter(
+				removed_interactions = Interaction.objects.filter(
 					Q(time_start__gte=time_of_infection),
 					Q(time_stop__lte=time_of_recovery),
 					Q(individual_one=i1) | Q(individual_two=i1),
@@ -303,11 +303,13 @@ def program_sir_sendhome(infection_function, recovery_function, set_of_parameter
 		
 	# STORE INITIAL INFECTED
 	for ind_uuid in Y0:
+		print 'storing initial infected'
 		individual = Individual.objects.get(ind_uuid=ind_uuid)
 		ii = InitialInfected.objects.create(sim_run=sim_run, individual_infected=individual)
 
 	# STORE S, I, T
 	for s, i, t in zip(S,I,T):
+		print 'storing S, I, T'
 		SimTimeSeries.objects.create(sim_run=sim_run,susceptible=s,infected=i,t=t)
 
 
