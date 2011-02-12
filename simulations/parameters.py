@@ -18,7 +18,7 @@ def powerset(iterable):
 	s = list(iterable)
 	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-def generate_initial_infected(option=None, N=None):
+def generate_initial_infected(option=None, N=None, *args, **kwargs):
 	"""
 	Several options
 		each: 
@@ -32,8 +32,17 @@ def generate_initial_infected(option=None, N=None):
 			Generate every possible combination up to some max number 
 	"""
 	# GET ALL INDIVIDUALS
-	individuals = Individual.objects.all().order_by('ind_uuid')[0:4]
-	
+	if kwargs.get('dryrun'):
+		individuals = Individual.objects.all().order_by('ind_uuid')[0:5]
+		print "\nWARNING:\nOnly showing example run for 5 individuals"
+		print "\tto see full output, from command line:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
+	elif kwargs.get('test_number'):
+		max_test_number = min(kwargs.get('test_number'), Individual.objects.count())
+		individuals = Individual.objects.all().order_by('ind_uuid')[0:max_test_number]
+		print "\nTESTING:\nOnly running for %s individuals" % max_test_number
+	else:
+		individuals = Individual.objects.all().order_by('ind_uuid')
+		
 	# SET reasonable DEFAULT:
 #	if option is None:
 #		option = 'expansive_max'
@@ -94,8 +103,8 @@ def set_initial_parameters(option=None, N=None):
 	Y0=generate_initial_infected(option, N)
 	timestep = [0.1]
 	max_time = [100]
-	t_min_filter = [0,300]
-	t_max_filter = [0,4000]
+	t_min_filter = [0]
+	t_max_filter = [4000]
 	multiplicity = 1 # i.e. number of times to run each simulation with same parameters
 	return beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity
 

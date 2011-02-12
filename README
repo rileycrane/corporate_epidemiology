@@ -59,6 +59,15 @@ THEN RUN YOUR CALCULATION
 
 
 
+##########################################
+# ** TO DO
+#	Extend model to send individuals home
+#	Generate Network Structure for each run
+#	For each individual, capture when illness begins and ends
+#	Incorporate Recovery Times
+#	Get rid of S, I, T timeseries (no need to capture them)
+#		Instead move the SimRun methods into fields
+
 ####################################################
 ####################################################
 # ** COMMON ERRORS

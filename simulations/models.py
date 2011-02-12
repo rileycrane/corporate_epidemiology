@@ -1,20 +1,38 @@
 from django.db import models
 from django.db.models import Max
+from mptt.models import MPTTModel
+###########################################################
+# ** BUILD BASE CLASS FOR SIMULATION OBJECT
+#		ALLOW OTHERS TO SUBCLASS FOR SPECIFIC SIMULATIONS 
+#class SimBasic(models.Model):
+#	"""
+#	Basic class for all simulations
+#	"""
+#	sim_uuid = models.CharField(max_length=50)
+#	infection_function = models.CharField(max_length=200,blank=True,null=True)
+#	created_at = models.DateTimeField(auto_now=True)
+#
+#	def initial_number_infections(self):
+#		"""
+#		Return the number of individuals initially infected
+#		"""
+#		return self.initialinfected_set.count()
 
 class SimRun(models.Model):
 	"""
 	Keeps track of the result of each calculation
 	"""
-	sim_uuid = models.CharField(max_length=50)
-	calculation_name = models.CharField(max_length=200,blank=True,null=True)
-	alpha = models.FloatField(blank=True,null=True)
-	beta  = models.FloatField(blank=True,null=True)
-	gamma = models.FloatField(blank=True,null=True)
-	timestep = models.FloatField(blank=True,null=True)
-	max_time = models.IntegerField(blank=True,null=True) 
-	t_min_filter = models.FloatField(blank=True,null=True) # 
-	t_max_filter = models.FloatField(blank=True,null=True) # 
-	created_at = models.DateTimeField(auto_now=True)
+	sim_uuid           = models.CharField(max_length=50)
+	infection_function = models.CharField(max_length=200,blank=True,null=True)
+	recovery_function  = models.CharField(max_length=200,blank=True,null=True)
+	alpha              = models.FloatField(blank=True,null=True)
+	beta               = models.FloatField(blank=True,null=True)
+	gamma              = models.FloatField(blank=True,null=True)
+	timestep           = models.FloatField(blank=True,null=True)
+	max_time           = models.IntegerField(blank=True,null=True) 
+	t_min_filter       = models.FloatField(blank=True,null=True) # 
+	t_max_filter       = models.FloatField(blank=True,null=True) # 
+	created_at         = models.DateTimeField(auto_now=True)
 
 	def initial_number_infections(self):
 		"""
@@ -38,7 +56,7 @@ class SimRun(models.Model):
 		"""
 		Returns a string associated with this calculation
 		"""
-		return "%s, %s: %s" % (self.calculation_name,self.created_at,self.sim_uuid)
+		return "%s, %s: %s" % (self.infection_function,self.created_at,self.sim_uuid)
 
 	def get_absolute_url(self):
 		"""
@@ -78,6 +96,24 @@ class InitialInfected(models.Model):
 	individual_infected = models.ForeignKey(Individual) 
 	def __unicode__(self):
 		return "%s: %s" % (self.sim_run.sim_uuid, self.individual_infected.ind_uuid)
+
+class InfectionNetwork(MPTTModel):
+	"""
+	Store adjacency lists, trees
+	"""
+	parent          = models.ForeignKey('self', null=True, blank=True, related_name='children')
+	individual      = models.ForeignKey(Individual,unique=True)
+	infection_start = models.IntegerField(blank=True, null=True)
+	infection_stop  = models.IntegerField(blank=True, null=True)
+	duration        = models.FloatField(blank=True, null=True)
+
+	def __unicode__(self):
+		if self.parent:
+			return "%s: infected by %s @ %s" % (self.individual.ind_uuid, self.parent.individual.ind_uuid,self.infection_start)
+		else:
+			return "%s: initial seed" % (self.individual.ind_uuid)
+
+
 
 class Interaction(models.Model):
 	"""
