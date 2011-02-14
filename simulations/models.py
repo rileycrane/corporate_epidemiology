@@ -67,6 +67,17 @@ class SimRun(models.Model):
 			
 			adjacency_list.append('%s, %s, %s, %s' % (vector, target, time_start_infection, time_stop_infection))
 		return adjacency_list
+	
+	def get_initial_infected(self):
+		"""
+		Get set of individuals that were infected at beginning of simulation
+		"""
+		initial_individuals_infected = []
+		for infection in self.infectionevent_set.all():
+			if infection.vector is None:
+				intial_individuals_infected.append(infection.target)
+		return initial_individuals_infected
+		return 
 
 	def __unicode__(self):
 		"""

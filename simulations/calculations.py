@@ -35,10 +35,10 @@ def program_si(infection_function, recovery_function, sendhome_function, set_of_
 	Code to produce a single SI time series based on input parameters
 	"""
 	if kwargs.get('dryrun'):
-		print 'DRY RUN: %s, %s, %s' % (infection_function, recovery_function, set_of_parameters)
+		print '\tDRY RUN: %s, %s, %s, %s' % (infection_function, recovery_function, sendhome_function, set_of_parameters)
 		return None
 	elif kwargs.get('test_number'):
-		print 'TESTING: %s, %s, %s' % (infection_function, recovery_function, set_of_parameters)
+		print '\tTESTING: %s, %s, %s, %s' % (infection_function, recovery_function, sendhome_function, set_of_parameters)
 		return None
 	
 	# ** LOAD INFECTION FUNCTION
@@ -80,14 +80,54 @@ def program_si(infection_function, recovery_function, sendhome_function, set_of_
 	
 	# SET INITIAL S, I status for all individuals
 	initial_infection_start_time = Interaction.objects.aggregate(Min('time_start')).get('time_start__min')
+	end_of_simulation_time = Interaction.objects.aggregate(Max('time_stop')).get('time_stop__max')
 	for individual in Individual.objects.all():
 		# SET INFECTED
 		if individual.ind_uuid in Y0:
-			individual.is_infected = True
-			infection_network, in_created = InfectionNetwork.objects.get_or_create(individual=individual,infection_start=initial_infection_start_time)
+			print 'infecting: %s' % individual.ind_uuid
+			
+			###############################
+			# ** SET <INFECTION STATUS>
+			# How long does it last?
+			duration = recovery_function(gamma)
+			# When should they go home?
+			go_home_at   = initial_infection_start_time + duration
+			# When should they come back?
+			come_back_at = initial_infection_start_time + duration
+
+			# GET INFECTION STATUS OBJECT FOR THIS INDIVIDUAL
+			infection_status = InfectionStatus.objects.get(individual=individual)
+			infection_status.is_infected     = True
+			infection_status.is_at_home_from = go_home_at
+			infection_status.is_at_home_until= come_back_at
+			infection_status.save()
+			################################
+			
+			################################
+			# ** SET <INFECTION EVENT>
+			infection_event, infevent_created = InfectionEvent.objects.get_or_create(
+							sim_run = sim_run,
+							interaction=None,
+							vector=None,
+							target=individual,
+							time_start_infection = initial_infection_start_time,
+							time_stop_infection  = infection_status.is_at_home_until,
+							time_start_symptoms  = go_home_at,
+							time_stop_symptoms   = come_back_at,
+							duration_symptoms    = come_back_at - go_home_at,
+							duration_infection   = duration,
+							)
+			##################################
+			
+			#individual.is_infected = True
+			#infection_network, in_created = InfectionNetwork.objects.get_or_create(individual=individual,infection_start=initial_infection_start_time)
 		else:
-			individual.is_infected = False
-		individual.save()
+			#########################
+			# ** SET <INFECTION STATUS>
+			infection_status = InfectionStatus.objects.get(individual=individual)
+			infection_status.is_infected = False
+			infection_status.save()
+			##########################
 
 	####################################
 	####################################
@@ -165,13 +205,11 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 	"""
 	Code to produce a single SI time series based on input parameters
 	"""
-	
 	if kwargs.get('dryrun'):
-		print 'DRY RUN: %s, %s, %s' % (infection_function, recovery_function, set_of_parameters)
+		print '\tDRY RUN: %s, %s, %s, %s' % (infection_function, recovery_function, sendhome_function, set_of_parameters)
 		return None
-
 	elif kwargs.get('test_number'):
-		print 'TESTING: %s, %s, %s' % (infection_function, recovery_function, set_of_parameters)
+		print '\tTESTING: %s, %s, %s, %s' % (infection_function, recovery_function, sendhome_function, set_of_parameters)
 		return None
 	
 	# ** LOAD INFECTION FUNCTION

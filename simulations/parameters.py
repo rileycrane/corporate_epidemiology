@@ -82,15 +82,16 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 	if kwargs.get('dryrun'):
 		#individuals = Individual.objects.all().order_by('ind_uuid')[0:5]
 		print "\nWARNING:\nOnly showing example run for 5 sets"
-		print "\tto see full output, from command line:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
+		print "\tto see full output, from command line type:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
 		max_test_number = min(5, len(results))
 		results = results[0:max_test_number]
-		print results
+		#print results
+		
 	elif kwargs.get('test_number'):
 		max_test_number = min(kwargs.get('test_number'), len(results))
 		print "\nTESTING:\nOnly running for %s sets" % max_test_number
 		results = results[0:max_test_number]
-		print results
+		#print results
 
 	return results
 

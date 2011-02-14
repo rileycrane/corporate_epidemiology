@@ -46,63 +46,56 @@ t_max_filter = [4000]
 #		CALLS 
 def main():
 	# ** OPTIONS
-	usage = "\n\tpython simulations/simulate.py --simulation_name='program_si' --infection='if' --recovery='rf' --initial_infected='expansive_max' --iiN=2 --dryrun=True"
+	usage = "\n\tpython simulations/simulate.py --simulation_name='program_si' --infection='standard_infection' --recovery='standard_recovery' --sendhome='standard_sendhome' --initial_infected='expansive_max' --iiN=2 --dryrun=True --test_number=3"
 
 	parser = OptionParser(usage)
 	# INFECTION KERNEL: DEFAULT = standard_infection (see infections.py)
 	parser.add_option("--infection", 
 					action="store", dest="infection_function", default='standard_infection',
-					help="Specify which infection function to use.  See infections.py")
+					help="Specify which infection function to use.  See infections.py\n")
 	# RECOVERY KERNEL: DEFAULT = standard_recovery (see recovery.py). NOT USED WITH SI
 	parser.add_option("--recovery", 
 					action="store", dest="recovery_function", default='standard_recovery',
-					help="Specify which recovery function to use.  See recovery.py")
+					help="Specify which recovery function to use.  See recovery.py\n")
 	# SENDHOME KERNEL: DEFAULT = standard_sendhome (see sendhome.py). NOT USED WITH SI
 	parser.add_option("--sendhome", 
 					action="store", dest="sendhome_function", default='standard_sendhome',
-					help="Specify which sendhome function to use.  See sendhome.py")
+					help="Specify which sendhome function to use.  See sendhome.py\n")
 	# SPECIFY HOW TO GENERATE THE INITIAL INFECTED SETS
 	parser.add_option("--initial_infected", 
 					action="store", dest="initial_infected", default='each',
-					help="Specify how to generate the initial infections.  See parameters.py")
+					help="Specify how to generate the initial infections.  See parameters.py\n")
 	# SPECIFY N FOR INITIAL INFECTED.  ONLY USED WITH --initial_infected = ("combo", "expansive_max")
 	parser.add_option("--iiN", 
 					action="store", dest="iiN", default='3',
-					help="Specify N for some initial infections.  See parameters.py")
+					help="Specify N for some initial infections.  See parameters.py\n")
 	# MULTIPLICITY
 	parser.add_option("--M", 
 					action="store", dest="multiplicity", default=1,
-					help="Specify multiplicity of parameter sets.  See parameters.py")
+					help="Specify multiplicity of parameter sets.  See parameters.py\n")
 	# WHICH FUNCTION TO USE FOR SIMULATION: allows switching between SI, SIR, etc
 	parser.add_option("--simulation_name", 
 					action="store", dest="simulation_name", default='program_si',
-					help="Specify which simulation to use.  See calculations.py")
+					help="Specify which simulation to use.  See calculations.py\n")
 
 	# TEST RUN
 	parser.add_option("--test_number",
 					action="store", dest="test_number", default=0,
-					help="Pass in an integer that will only run N simulations...an easy way to start small")
+					help="Pass in an integer that will only run N simulations...an easy way to start small\n")
 
 	
 	# DRY RUN
 	parser.add_option("--dryrun",
 					action="store", dest="dryrun", default=False,
-					help="SHOW WHICH PARAMETERS WILL BE USED.  Calculate estimated time")
+					help="SHOW WHICH PARAMETERS WILL BE USED.  Calculate estimated time\n")
 
 	##########################################
 	# ** PARSE OPTIONS
 	(options, args) = parser.parse_args()
 
-	##########################################
-	# ** VALIDATE OPTIONS
-#	if len(args) != 1:
-#		parser.error("incorrect number of arguments")
-#	if options.verbose:
-#		print "reading %s..." % options.filename
-	
 	##############################################
 	# ** STORE OPTIONS
-	print options
+	#print options
 	infection_function = options.infection_function
 	recovery_function  = options.recovery_function
 	sendhome_function  = options.sendhome_function
@@ -113,9 +106,11 @@ def main():
 	simulation_name    = options.simulation_name
 	test_number        = int(options.test_number)
 
+	###############################################
+	###############################################
 	# ** GENERATE SETS OF INITIAL INFECTIONS
 	#		MUST USE: 0 < N < (# of individuals)
-	
+	###############################################
 	Y0=generate_initial_infected(option=initial_infected, N=N, dryrun=dryrun, test_number=test_number)
 	# ** GENERATE PARAMETER SETS: THIS CAN BE EDITED
 	#parameter_set = list(product(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter))
@@ -132,7 +127,16 @@ def main():
 	# ** INCORPORATE MULTIPLICITY TO RUN SAME PARAMETER SETS M-TIMES
 	full_parameter_set = M*parameter_set
 	
+	number_of_simulations = len(full_parameter_set)
+	counter = 0
+	
+	# PRINT USEFUL INFO
+	if dryrun:
+		print '\n\tDRY RUN: infection, \t\trecovery, \t\tsendhome, beta,\t\tgamma, \t\talpha, \t\t\tY0, tmin, tmax\n'
+
 	for set_of_parameters in full_parameter_set:
+		counter+=1
+		print 'On %s of %s' % (counter, number_of_simulations)
 		###########################################
 		# ** RUN SINGLE SIMULATION with parameters
 		#		This function must:
