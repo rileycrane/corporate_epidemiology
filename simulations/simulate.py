@@ -23,12 +23,12 @@ from optparse import OptionParser
 #######################################################
 # ** MUST SPECIFY PARAMETER SETS HERE
 from numpy import arange
-#	BETA
+#	BETA: TRANSMISSION RATE
 beta=[1] #beta = arange(1,1.5,0.1)
 #	GAMMA rate of recovery (in seconds?)
-gamma=[1/100000]  # gamma = arange(0.4, 0.6, 0.1)
+gamma=[1/10000]  # gamma = arange(0.4, 0.6, 0.1)
 #	ALPHA: sendhome parameter: NOTE: 0 < alpha < 1 : the fraction of total infection period to wait before going home
-alpha=[.9]
+alpha=[.7]
 #	TIMESTEP (NOT USED WITH SI MODEL)
 timestep = [0.1]
 #	MAX_TIME (NOT USED WITH SI MODEL)
@@ -46,7 +46,7 @@ t_max_filter = [4000]
 #		CALLS 
 def main():
 	# ** OPTIONS
-	usage = "\n\tpython simulations/simulate.py --simulation_name='program_si' --infection='standard_infection' --recovery='standard_recovery' --sendhome='standard_sendhome' --initial_infected='expansive_max' --iiN=2 --dryrun=True --test_number=3"
+	usage = "\n\tpython simulations/simulate.py --simulation_name='program_sir_sendhome' --infection='standard_infection' --recovery='standard_recovery' --sendhome='standard_sendhome' --initial_infected='expansive_max' --iiN=2 --dryrun=True --test_number=3"
 
 	parser = OptionParser(usage)
 	# INFECTION KERNEL: DEFAULT = standard_infection (see infections.py)
@@ -75,7 +75,7 @@ def main():
 					help="Specify multiplicity of parameter sets.  See parameters.py\n")
 	# WHICH FUNCTION TO USE FOR SIMULATION: allows switching between SI, SIR, etc
 	parser.add_option("--simulation_name", 
-					action="store", dest="simulation_name", default='program_si',
+					action="store", dest="simulation_name", default='program_sir_sendhome',
 					help="Specify which simulation to use.  See calculations.py\n")
 
 	# TEST RUN

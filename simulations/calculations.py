@@ -84,7 +84,7 @@ def program_si(infection_function, recovery_function, sendhome_function, set_of_
 	for individual in Individual.objects.all():
 		# SET INFECTED
 		if individual.ind_uuid in Y0:
-			print 'infecting: %s' % individual.ind_uuid
+			#print 'infecting: %s' % individual.ind_uuid
 			
 			###############################
 			# ** SET <INFECTION STATUS>
