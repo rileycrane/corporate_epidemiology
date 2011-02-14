@@ -25,8 +25,10 @@ from optparse import OptionParser
 from numpy import arange
 #	BETA
 beta=[1] #beta = arange(1,1.5,0.1)
-#	NU rate of recovery (in seconds?)
-nu=[1/5000]  # gamma = arange(0.4, 0.6, 0.1)
+#	GAMMA rate of recovery (in seconds?)
+gamma=[1/100000]  # gamma = arange(0.4, 0.6, 0.1)
+#	ALPHA: sendhome parameter: NOTE: 0 < alpha < 1 : the fraction of total infection period to wait before going home
+alpha=[.9]
 #	TIMESTEP (NOT USED WITH SI MODEL)
 timestep = [0.1]
 #	MAX_TIME (NOT USED WITH SI MODEL)
@@ -55,6 +57,10 @@ def main():
 	parser.add_option("--recovery", 
 					action="store", dest="recovery_function", default='standard_recovery',
 					help="Specify which recovery function to use.  See recovery.py")
+	# SENDHOME KERNEL: DEFAULT = standard_sendhome (see sendhome.py). NOT USED WITH SI
+	parser.add_option("--sendhome", 
+					action="store", dest="sendhome_function", default='standard_sendhome',
+					help="Specify which sendhome function to use.  See sendhome.py")
 	# SPECIFY HOW TO GENERATE THE INITIAL INFECTED SETS
 	parser.add_option("--initial_infected", 
 					action="store", dest="initial_infected", default='each',
@@ -99,6 +105,7 @@ def main():
 	print options
 	infection_function = options.infection_function
 	recovery_function  = options.recovery_function
+	sendhome_function  = options.sendhome_function
 	initial_infected   = options.initial_infected # each, combo, expansive, expansive_max
 	N                  = int(options.iiN) # INITIAL INFECTED N
 	M                  = int(options.multiplicity) # MULTIPLICITY
@@ -108,7 +115,8 @@ def main():
 
 	# ** GENERATE SETS OF INITIAL INFECTIONS
 	#		MUST USE: 0 < N < (# of individuals)
-	Y0=generate_initial_infected(initial_infected, N, dryrun=dryrun, test_number=test_number)
+	
+	Y0=generate_initial_infected(option=initial_infected, N=N, dryrun=dryrun, test_number=test_number)
 	# ** GENERATE PARAMETER SETS: THIS CAN BE EDITED
 	#parameter_set = list(product(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter))
 	
@@ -117,10 +125,11 @@ def main():
 	if simulation_name == 'program_si':
 		parameter_set = list(product(beta, Y0, t_min_filter, t_max_filter)) # USED FOR SI CALCULATIONS
 	elif simulation_name=='program_sir_sendhome':
-		parameter_set = list(product(beta, nu, Y0, t_min_filter, t_max_filter)) # USED FOR SIR CALCULATIONS
+		parameter_set = list(product(beta, gamma, alpha, Y0, t_min_filter, t_max_filter)) # USED FOR SIR CALCULATIONS
+	###################################################################################
 	
 	
-	# ** INCORPORATE MULTIPLICITY TO RUN SAME PARAMETERS M-TIMES
+	# ** INCORPORATE MULTIPLICITY TO RUN SAME PARAMETER SETS M-TIMES
 	full_parameter_set = M*parameter_set
 	
 	for set_of_parameters in full_parameter_set:
@@ -138,7 +147,7 @@ def main():
 			raise Exception('\n\nERROR:\t--simulation_name=%s does not correspond to known function. \n\t\tCheck simulations/calculations.py for valid function names.' % simulation_name)
 		
 		# RUN SINGLE SIMULATION
-		simulate = simulation(infection_function, recovery_function, set_of_parameters, dryrun=dryrun)
+		simulate = simulation(infection_function, recovery_function, sendhome_function, set_of_parameters, dryrun=dryrun)
 
 
 if __name__ == "__main__":

@@ -31,17 +31,7 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 		expansive_max=N:
 			Generate every possible combination up to some max number 
 	"""
-	# GET ALL INDIVIDUALS
-	if kwargs.get('dryrun'):
-		individuals = Individual.objects.all().order_by('ind_uuid')[0:5]
-		print "\nWARNING:\nOnly showing example run for 5 individuals"
-		print "\tto see full output, from command line:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
-	elif kwargs.get('test_number'):
-		max_test_number = min(kwargs.get('test_number'), Individual.objects.count())
-		individuals = Individual.objects.all().order_by('ind_uuid')[0:max_test_number]
-		print "\nTESTING:\nOnly running for %s individuals" % max_test_number
-	else:
-		individuals = Individual.objects.all().order_by('ind_uuid')
+	individuals = Individual.objects.all().order_by('ind_uuid')
 		
 	# SET reasonable DEFAULT:
 #	if option is None:
@@ -62,6 +52,7 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 		id_list.append(id.ind_uuid)
 		
 	# PROCESS LIST
+	
 	if option=='each':
 		results = list(combinations(id_list,1))  
 		
@@ -83,6 +74,24 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 			if len(elem)<=N:
 				results.append(elem)
 		
+		kwargs['test_number']=int(kwargs['test_number'])
+		max_test_number = min(kwargs.get('test_number'), Individual.objects.count())
+		individuals = Individual.objects.all().order_by('ind_uuid')[0:max_test_number]
+
+	# GET ALL INDIVIDUALS
+	if kwargs.get('dryrun'):
+		#individuals = Individual.objects.all().order_by('ind_uuid')[0:5]
+		print "\nWARNING:\nOnly showing example run for 5 sets"
+		print "\tto see full output, from command line:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
+		max_test_number = min(5, len(results))
+		results = results[0:max_test_number]
+		print results
+	elif kwargs.get('test_number'):
+		max_test_number = min(kwargs.get('test_number'), len(results))
+		print "\nTESTING:\nOnly running for %s sets" % max_test_number
+		results = results[0:max_test_number]
+		print results
+
 	return results
 
 

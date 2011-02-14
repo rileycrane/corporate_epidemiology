@@ -48,6 +48,25 @@ def load_individuals():
 			interaction.save()
 		except:
 			pass
+		
+		# GET OR CREATE INFECTION STATUS OBJECTS
+		infection_status_one, isone_created = InfectionStatus.objects.get_or_create(
+									individual  = individual_one,
+									is_infected = False,
+									is_at_home_until = 0,
+									is_initial       = False, 
+									)
+		infection_status_two, istwo_created = InfectionStatus.objects.get_or_create(
+									individual  = individual_two,
+									is_infected = False,
+									is_at_home_until = 0, 
+									is_initial       = False,
+									)
 
 if __name__=='__main__':
-	load_individuals()
+	
+	try:
+		load_individuals()
+		print 'done'
+	except KeyboardInterrupt:
+		print 'See you later!'
