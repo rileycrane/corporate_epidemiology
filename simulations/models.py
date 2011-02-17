@@ -183,6 +183,8 @@ class Interaction(models.Model):
 
 		##########################################################################
 		# UPDATE INFECTION STATE AT BEGINNING OF INTERACTION
+		#	Fast-forwards the individual's infection status to the current time
+		#	This is necessary since we are not 'time-stepping'
 		if self.individual_one.is_infected() and self.individual_two.is_infected():
 			# UPDATE ONE
 			if self.time_start > infection_status_one.is_at_home_until:
