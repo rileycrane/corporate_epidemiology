@@ -20,6 +20,11 @@ import uuid, time
 from itertools import *
 from optparse import OptionParser
 
+########################
+# ** LOGGING
+import logging
+logger = logging.getLogger('corp_epi')
+
 #######################################################
 # ** MUST SPECIFY PARAMETER SETS HERE
 from numpy import arange
@@ -45,6 +50,7 @@ t_max_filter = [4000]
 #		READS COMMAND LINE OPTIONS
 #		CALLS 
 def main():
+	logger.info('')
 	# ** OPTIONS
 	usage = "\n\tpython simulations/simulate.py --simulation_name='program_sir_sendhome' --infection='standard_infection' --recovery='standard_recovery' --sendhome='standard_sendhome' --initial_infected='expansive_max' --iiN=2 --dryrun=True --test_number=3"
 
@@ -116,7 +122,7 @@ def main():
 	#parameter_set = list(product(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter))
 	
 	###################################################################################
-	# ** NEEDS UPDATING TO HANDLE SI & SIR gracefully: currently hard-coded for each
+	# ** NEEDS UPDATING TO HANDLE SI & SIR more gracefully
 	if simulation_name == 'program_si':
 		parameter_set = list(product(beta, Y0, t_min_filter, t_max_filter)) # USED FOR SI CALCULATIONS
 	elif simulation_name=='program_sir_sendhome':
@@ -134,9 +140,11 @@ def main():
 	if dryrun:
 		print '\n\tDRY RUN: infection, \t\trecovery, \t\tsendhome, beta,\t\tgamma, \t\talpha, \t\t\tY0, tmin, tmax\n'
 
+	logger.info('starting to loop through all parameters: %s' % len(full_parameter_set))
 	for set_of_parameters in full_parameter_set:
+		logger.debug(set_of_parameters)
 		counter+=1
-		print 'On %s of %s' % (counter, number_of_simulations)
+		logger.info('On %s of %s' % (counter, number_of_simulations))
 		###########################################
 		# ** RUN SINGLE SIMULATION with parameters
 		#		This function must:
@@ -155,100 +163,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#def simulate(infection_function=None, recovery_function=None):
-#	"""
-#	Main program to control the simulation.
-#	
-#	It will run all simulations based on all the parameter sets you specify, along with the multiplicity of each one
-#		(i.e. run 10 simulations using the following parameter values (alpha=1, beta=1.1,...)
-#	"""
-#	if infection_function is None:
-#		infection_function = 'standard'
-#	if recovery_function is None:
-#		recovery_function = 'standard'
-#		
-#	################################
-#	# ** Get all parameter sets
-#	parameters = get_parameters('each')
-#	#parameters = get_parameters('combo',3)
-#	#parameters = get_parameters('expansive')
-#	#parameters = get_parameters('expansive_max',3)
-#	
-#	####################
-#	# ** Shows you the parameters you are about to run your simulations with 
-#	if dryrun:
-#		print "This will run %s simulations with the following parameters\n"
-#		time.sleep(1)
-#		print parameters
-#		return None
-#	
-#	# Loop through each set:
-#	for parameter_set in parameters:
-#		# GET PARAMETERS
-#		beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter = parameter_set
-#		
-#		# Generate unique id for run
-#		sim_uuid = str(uuid.uuid4())[0:30]
-#
-#		# RUN SIMULATION
-##		try:
-#		# GENERATE TIME SERIES using the simulation kernal defined in simulations/calculations.py
-#		try:
-#			print "\tExecuting:\n\t\tbeta:%s\n\t\tY0:%s\n\t\t%s\n\t\t%s" % (beta, Y0, t_min_filter, t_max_filter)
-#			S, I, T = program_si(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, infection_function)
-#		except:
-#			continue
-#		
-#		# DERIVATIVE CALCULATIONS ON time series data  
-#		
-#		
-#		# CREATE DICTIONARY TO LOAD VARIABLE SIMRUN PARAMETERS
-#		simulation_dict = {
-#						'beta':beta,
-#						'gamma':gamma,
-#						't_min_filter':t_min_filter,
-#						't_max_filter':t_max_filter,
-#						}
-#
-#		# STORE PARAMETERS
-#		sim_run = SimRun.objects.create(
-#									sim_uuid=sim_uuid,
-#									infection_function=infection_function,
-#									 **simulation_dict)
-#		
-#		# TURN SINGLE INDIVIDUAL INTO A LIST
-#		if isinstance(Y0,int):
-#			Y0=(Y0,)
-#		# STORE INITIAL INFECTED
-#		for ind_uuid in Y0:
-#			individual = Individual.objects.get(ind_uuid=ind_uuid)
-#			ii = InitialInfected.objects.create(sim_run=sim_run, individual_infected=individual)
-#		
-#		# STORE S, I, T
-#		for s, i, t in zip(S,I,T):
-#			SimTimeSeries.objects.create(sim_run=sim_run,susceptible=s,infected=i,t=t)
-##		except:
-##			continue
-
-
+	try:
+		main()
+	except KeyboardInterrupt:
+		print 'see you later'

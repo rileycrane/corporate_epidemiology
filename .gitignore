@@ -1,5 +1,7 @@
 *.pyc
 epi.db
 .settings/*
+graphs/*
+log/*
 *~
 .DS_Store

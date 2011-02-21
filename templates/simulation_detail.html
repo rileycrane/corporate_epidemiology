@@ -1,28 +1,10 @@
 {% extends "base.html" %}
 
-{% block extrahead %}
-<style type="text/css">
-a:active, a:link, a:visited { text-decoration: none; }
-a:hover { text-decoration: underline; }
-</style>
-	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-	<script type="text/javascript">
-	  google.load("visualization", "1", {packages:["corechart"]});
-	  google.setOnLoadCallback(drawChart);
-	  function drawChart() {
-		var data = new google.visualization.DataTable();
-		{{visualization_data|safe}}
-		var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-		chart.draw(data, {width: 600, height: 540, title: 'Simulation'});
-	  }
-	</script>
-
-{% endblock %}
-
-
-{% block content %} 
+{% block content %}
 		<div>
 			<h4><a href="{% url simulations %}">Back to all runs</a></h4>
+			<h5><a href="{{sim_run.get_next_by_created_at.get_absolute_url}}">Next</a></h5>
+			<h5><a href="{{sim_run.get_previous_by_created_at.get_absolute_url}}">Previous</a></h5>
 			<ul>
 				<li>Final Size: {{sim_run.final_size}}</li>
 				<li>Beta: {{sim_run.beta}}</li>
@@ -35,13 +17,6 @@ a:hover { text-decoration: underline; }
 					</ul>
 				</li>
 			</ul>
-			<div id='chart_div' style='width: 630px; height: 540px;'></div>
-			<!---<div>
-				<ul>
-				{% for interaction in sim_run.interaction_network %}
-					<li>Duration ({{interaction.duration}}):  {{interaction.individual_one}} & {{interaction.individual_two}}</li>
-				{% endfor %}
-				</ul>
-			</div>
-			-->	
+			<img src="/media/{{graph}}"/>
+		</div>
 {% endblock %}

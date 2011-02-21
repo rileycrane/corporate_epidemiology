@@ -3,6 +3,8 @@ from django.template import RequestContext
 from django.views.generic.simple import direct_to_template
 from simulations.models import *
 
+
+
 def get_simulation_data(sim_uuid):
 	"""
 	Gets daily susceptible and shows those which are > level 1 --> word of mouth
@@ -38,8 +40,15 @@ def simulation_detail(request, uuid, template_name=None):
 	########################################
 	if template_name is None:
 		template_name = 'simulation_detail.html'
-	visualization_data =get_simulation_data(uuid)
+	# Generate Graph
+	sim_run = SimRun.objects.get(sim_uuid=uuid)
+	sim_run.to_graph()
+	
+	file_name = sim_run.sim_uuid.replace('-','')
+	graph = '/graphs/%s.png' % (file_name)
+#	visualization_data =get_simulation_data(uuid)
 	context = {}
-	context['visualization_data'] = visualization_data
+	#context['visualization_data'] = visualization_data
 	context['sim_run']=SimRun.objects.get(sim_uuid=uuid)
+	context['graph'] = graph
 	return direct_to_template(request, template_name, extra_context=context, context_instance=RequestContext(request))

@@ -6,11 +6,16 @@ ROOT_PATH = os.path.dirname(__file__)
 
 # IMPORT DATA MODELS
 from simulations.models import *
+########################
+# ** LOGGING
+import logging
+logger = logging.getLogger('corp_epi')
 
 def load_individuals():
 	"""
 	PARSE ir_interactions.txt and load data to models
 	"""
+	logger.info('')
 	# DEFINE PATH TO FILE
 	data_file  = os.path.join(ROOT_PATH,'data','ir_interactions.txt')
 
@@ -29,7 +34,8 @@ def load_individuals():
 	for single_interaction in content_list:
 		# Extract data from line
 		id_one, id_two, time_start, time_stop = single_interaction.split()
-		
+
+		logger.info('id_one: %s, id_two: %s' % (id_one, id_two))
 		# GET OR CREATE id one in database 
 		individual_one, id_one_created = Individual.objects.get_or_create(ind_uuid=id_one)
 		# GET OR CREATE id two in database
@@ -53,14 +59,14 @@ def load_individuals():
 		infection_status_one, isone_created = InfectionStatus.objects.get_or_create(
 									individual  = individual_one,
 									is_infected = False,
+									is_at_home_from  = 0,
 									is_at_home_until = 0,
-									is_initial       = False, 
 									)
 		infection_status_two, istwo_created = InfectionStatus.objects.get_or_create(
 									individual  = individual_two,
 									is_infected = False,
+									is_at_home_from  = 0,
 									is_at_home_until = 0, 
-									is_initial       = False,
 									)
 
 if __name__=='__main__':

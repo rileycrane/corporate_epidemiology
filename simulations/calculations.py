@@ -22,6 +22,12 @@ from simulations import infections, recovery, sendhome
 from numpy.random import rand
 from numpy import exp
 
+########################
+# ** LOGGING
+import logging
+logger = logging.getLogger('corp_epi')
+
+
 def initialize_run():
 	"""
 	Eventually add a function that sets up the simulation run
@@ -35,6 +41,8 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 	"""
 	Code to produce a single SI time series based on input parameters
 	"""
+	logger.info('')
+
 	if kwargs.get('dryrun'):
 		print '\tDRY RUN: %s, %s, %s, %s' % (infection_function, recovery_function, sendhome_function, set_of_parameters)
 		return None
@@ -93,10 +101,12 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 	
 	# SET INITIAL S, I status for all individuals
 	initial_infection_start_time = Interaction.objects.aggregate(Min('time_start')).get('time_start__min')
+	
+	logger.info('initializing infected')
 	for individual in Individual.objects.all():
 		# SET INFECTED
 		if individual.ind_uuid in Y0:
-			print 'infecting: %s' % individual.ind_uuid
+			logger.debug('infecting: %s' % individual.ind_uuid)
 			###############################
 			# ** SET <INFECTION STATUS>
 			# How long does it last?
@@ -147,6 +157,7 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 	####################################
 
 	# MAIN LOOP: CALCULATE INFECTIONS	
+	logger.info('starting valid interaction loop')
 	for interaction in all_valid_interactions:
 		
 		#############################################
@@ -156,6 +167,7 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 		#		Also, we do not allow if both individuals are infected or both are susceptible
 		#		See simulations/models.py near line 169 for the code behind this method
 		if interaction.is_not_allowed():
+			logger.debug('skipping interaction: %s' % interaction)
 			continue
 		
 		# ** GET BOTH INDIVIDUALS
@@ -168,6 +180,7 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 			q = infection_function(interaction.duration, beta)
 			# DETERMINE IF INFECTION OCCURRED
 			if q > rand():
+				logger.debug('i1 infected i2: %s' % interaction.id)
 				
 				###############################
 				# ** SET <INFECTION STATUS>
@@ -231,6 +244,7 @@ def program_sir_sendhome(infection_function, recovery_function, sendhome_functio
 			q = infection_function(interaction.duration, beta)
 			# DETERMINE IF INFECTION OCCURRED
 			if q > rand():
+				logger.debug('i2 infected i1: %s' % interaction.id)
 				###############################
 				# ** SET <INFECTION STATUS>
 				# GET TIME OF INFECTION

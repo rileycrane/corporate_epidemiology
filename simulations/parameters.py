@@ -1,6 +1,11 @@
 from itertools import *
 from simulations.models import Individual
 
+
+########################
+# ** LOGGING
+import logging
+logger = logging.getLogger('corp_epi')
 # SPECIFY THE SETS OF PARAMETERS FOR THE SIMULATION
 #  ** OVERVIEW
 #	t_min_filter = sets the MINIMUM valid contact time.  if the duration of contact was less
@@ -15,6 +20,7 @@ def powerset(iterable):
 	powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 	usage: list(powerset([1,2,3]))
 	"""
+	logger.info('')
 	s = list(iterable)
 	return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
@@ -31,6 +37,7 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 		expansive_max=N:
 			Generate every possible combination up to some max number 
 	"""
+	logger.info('')
 	individuals = Individual.objects.all().order_by('ind_uuid')
 		
 	# SET reasonable DEFAULT:
@@ -54,17 +61,37 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 	# PROCESS LIST
 	
 	if option=='each':
+		logger.info('each')
 		results = list(combinations(id_list,1))  
 		
 	if option=='combo':
+		logger.info('combo: %s' % N)
 		if N is None:
 			raise Exception("You must specify a value of N")
 		results = list(combinations(id_list,N))
 
 	if option=='expansive':
+		logger.info('expansive')
+		# GET ALL INDIVIDUALS
+		if kwargs.get('dryrun'):
+			id_list = id_list[0:5]
+		elif kwargs.get('test_number'):
+			max_test_number = min(kwargs.get('test_number'), len(individuals))
+			logger.info("\nTESTING:\nOnly running for %s sets" % max_test_number)
+			id_list = id_list[max_test_number] 
+		
 		results = list(powerset(id_list))
 		
 	if option=='expansive_max':
+		logger.info('expansive_max: %s' % N)
+		# GET ALL INDIVIDUALS
+		if kwargs.get('dryrun'):
+			id_list = id_list[0:5]
+		elif kwargs.get('test_number'):
+			max_test_number = min(kwargs.get('test_number'), len(individuals))
+			logger.info("\nTESTING:\nOnly running for %s sets" % max_test_number)
+			id_list = id_list[max_test_number] 
+		
 		results = []
 		if N is None:
 			raise Exception("You must specify a value of N")
@@ -81,17 +108,15 @@ def generate_initial_infected(option=None, N=None, *args, **kwargs):
 	# GET ALL INDIVIDUALS
 	if kwargs.get('dryrun'):
 		#individuals = Individual.objects.all().order_by('ind_uuid')[0:5]
-		print "\nWARNING:\nOnly showing example run for 5 sets"
-		print "\tto see full output, from command line type:\n\tgenerate_initial_infected(%s,%s)" % (option, N)
+		logger.warning("Only showing example run for 5 sets")
+		logger.info("\tto see full output, from command line type:\n\tgenerate_initial_infected(%s,%s)" % (option, N))
 		max_test_number = min(5, len(results))
 		results = results[0:max_test_number]
-		#print results
 		
 	elif kwargs.get('test_number'):
 		max_test_number = min(kwargs.get('test_number'), len(results))
-		print "\nTESTING:\nOnly running for %s sets" % max_test_number
+		logger.info("\nTESTING:\nOnly running for %s sets" % max_test_number)
 		results = results[0:max_test_number]
-		#print results
 
 	return results
 
@@ -120,7 +145,7 @@ def set_initial_parameters(option=None, N=None):
 
 # COMBINES PARAMETER SETS
 def get_parameters(option=None, N=None):
-	print "beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity"
+	logger.info("beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity")
 	beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter, multiplicity = set_initial_parameters(option, N)
 	parameter_set = list(product(beta, gamma, alpha, Y0, timestep, max_time, t_min_filter, t_max_filter))
 	full_parameter_set = multiplicity*parameter_set

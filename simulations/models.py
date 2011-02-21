@@ -1,6 +1,12 @@
+from __future__ import division
+from django.conf import settings
 from django.db import models
 from django.db.models import Max
 from mptt.models import MPTTModel
+import pygraphviz as pgv
+import pdb
+
+PATH_TO_CORP_EPI = getattr(settings, 'PATH_TO_CORP_EPI','')
 ###########################################################
 # ** BUILD BASE CLASS FOR SIMULATION OBJECT
 #		ALLOW OTHERS TO SUBCLASS FOR SPECIFIC SIMULATIONS 
@@ -33,17 +39,43 @@ class SimRun(models.Model):
 	t_max_filter       = models.FloatField(blank=True,null=True) # 
 	created_at         = models.DateTimeField(auto_now=True)
 
-	def initial_number_infections(self):
+	def get_initial_infected_individuals(self):
+		"""
+		Get set of individuals that were infected at beginning of simulation
+		"""
+		initial_individuals_infected = []
+		for infection in self.infectionevent_set.all():
+			if infection.vector is None:
+				initial_individuals_infected.append(infection.target)
+		return initial_individuals_infected
+
+	def number_initial_infections(self):
 		"""
 		Return the number of individuals initially infected
 		"""
-		return self.initialinfected_set.count()
+		return self.infectionevent_set.filter(interaction=None).count()
 	
-	def final_size(self):
+	def number_secondary_infections(self):
 		"""
-		Return the final size of the epidemic
+		Return the total number of infection events, discounted by the number of initial infections
 		"""
-		return self.simtimeseries_set.aggregate(Max('infected')).get('infected__max')
+		#return self.simtimeseries_set.aggregate(Max('infected')).get('infected__max')
+		return self.infectionevent_set.count()-self.number_initial_infections()
+	
+	def percent_infected(self):
+		"""
+		Calculate what fraction of the total population was infected at some point during the outbreak
+		"""
+		#individuals = Individual.objects.all()
+		infected_individuals = self.get_initial_infected_individuals()
+		for infection_event in self.infectionevent_set.all():
+			if infection_event.target not in infected_individuals:
+				infected_individuals.append(infection_event.target)
+		
+		infected_count = len(infected_individuals)
+		total_count    = Individual.objects.count()
+		percent_infected = infected_count/total_count
+		return percent_infected
 	
 	def interaction_network(self):
 		"""
@@ -54,7 +86,7 @@ class SimRun(models.Model):
 	def to_adjacency(self):
 		"""
 		Returns adjacency list in the following format
-			infecter, infectee, time_of_infection, time_incubation, time_symptomatic, duration
+			infecter, infectee, time_start_infection, time_sent_home, time_return_work, time_stop_infection
 		"""
 		adjacency_list = []
 		for infection in self.infectionevent_set.all():
@@ -65,20 +97,42 @@ class SimRun(models.Model):
 			time_start_symptoms  = infection.time_start_symptoms
 			time_stop_symptoms   = infection.time_stop_symptoms
 			
-			adjacency_list.append('%s, %s, %s, %s' % (vector, target, time_start_infection, time_stop_infection))
+			adjacency_list.append(
+					'%s, %s, %s, %s, %s, %s' % (vector, target, time_start_infection, time_start_symptoms, time_stop_symptoms, time_stop_infection)
+					)
 		return adjacency_list
-	
-	def get_initial_infected(self):
-		"""
-		Get set of individuals that were infected at beginning of simulation
-		"""
-		initial_individuals_infected = []
-		for infection in self.infectionevent_set.all():
-			if infection.vector is None:
-				intial_individuals_infected.append(infection.target)
-		return initial_individuals_infected
-		return 
 
+	def to_graph(self):
+		"""
+		Create a graph
+		"""
+		dot_name = '%s/media/graphs/%s.dot' % (PATH_TO_CORP_EPI, self.sim_uuid)
+		img_name = '%s/media/graphs/%s.png' % (PATH_TO_CORP_EPI, self.sim_uuid)
+		dot_name = dot_name.replace('-','')
+		img_name = img_name.replace('-','')
+		dot_file = open(dot_name,'w')
+		img_file = open(img_name,'w')
+		#dot_name = 'd.dot'
+		#img_name = 'i.png'
+
+		A=pgv.AGraph()
+		for infection_event in self.infectionevent_set.all():
+			target = infection_event.target
+			vector = infection_event.vector
+			if target:
+				target_id = target.ind_uuid
+			else:
+				target_id = 0
+			if vector:
+				vector_id = vector.ind_uuid
+			else:
+				vector_id = 0
+			A.add_edge(target_id,vector_id)
+		A.write(path=dot_file) # write to simple.dot
+		B=pgv.AGraph(dot_name) # create a new graph from file
+		B.layout() # layout with default (neato)
+		B.draw(path=img_file) # draw png
+		
 	def __unicode__(self):
 		"""
 		Returns a string associated with this calculation

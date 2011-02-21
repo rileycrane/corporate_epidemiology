@@ -3,6 +3,7 @@ import os, sys
 ROOT_PATH = os.path.dirname(__file__) 
 sys.path.append(os.path.join(ROOT_PATH))
 
+PATH_TO_CORP_EPI = ROOT_PATH
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -23,6 +24,74 @@ DATABASES = {
     }
 }
 
+
+# A sample logging configuration. The only tangible logging
+# performed by this configuration is to send an email to
+# the site admins on every HTTP 500 error.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+LOGGING = {
+	'version': 1,
+
+	'disable_existing_loggers': True,
+
+	'formatters': {
+		'verbose': {
+			'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+		},
+		'simple': {
+			'format': '%(levelname)s %(message)s'
+		},
+		'intermediate': {
+			'format': '%(levelname)s | %(asctime)s | %(module)s | %(funcName)s | %(lineno)d :: %(message)s',
+			'datefmt':'%a, %d %b %H:%M:%S',
+		},
+
+	},
+
+	'handlers': {
+		'null': {
+			'level':'DEBUG',
+			'class':'django.utils.log.NullHandler',
+		},
+		'console':{
+			'level':'DEBUG',
+			'class':'logging.StreamHandler',
+			'formatter': 'simple'
+		},
+		'mail_admins': {
+			'level': 'ERROR',
+			'class': 'django.utils.log.AdminEmailHandler',
+		},
+		'rotating_file_handler': {
+			'level': 'DEBUG',
+			'class': 'logging.handlers.RotatingFileHandler',
+			'formatter': 'intermediate',
+			'filename': os.path.join(PATH_TO_CORP_EPI,'log','simulation.log'),
+			'maxBytes': 10*1024*1024,
+			'backupCount': 0,
+		},
+	},
+	'loggers': {
+		'django': {
+			'handlers':['null'],
+			'propagate': True,
+			'level':'INFO',
+		},
+		'django.request': {
+			'handlers': ['mail_admins'],
+			'level': 'ERROR',
+			'propagate': False,
+		},
+		'corp_epi': {
+			'handlers': ['rotating_file_handler'],
+			'propagate': True,
+			'level': 'INFO',
+		}
+	}
+
+}
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -30,7 +99,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New York'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
